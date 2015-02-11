@@ -1,6 +1,8 @@
 #include <iostream>
 #include <functional>
+#include "Argument.hpp"
 #include "uv.h"
+#include "common.hpp"
 #pragma once
 class FS{
   std::string fileName_;
@@ -22,6 +24,6 @@ class FS{
   int mode() const;
   FS& mode(int);
   FS& open(uv_fs_cb);
-  FS& read(uv_fs_cb=nullptr,int64_t=-1);
-  FS& close(uv_fs_cb=nullptr);
+  FS& read(cpuv_cb=nullptr,int64_t=-1);
+  FS& close(cpuv::Argument* =nullptr,uv_fs_cb=nullptr);
 };
