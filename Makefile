@@ -195,7 +195,7 @@ top_builddir = .
 top_srcdir = .
 bin_main_SOURCES = src/main.cpp src/DefaultLoop.cpp src/FS.cpp
 LDADD = deps/libuv/.libs/libuv.so $(INTLLIBS)
-AM_CPPFLAGS = -O3 -std=c++11 -Wall -Ideps/libuv/include -Isrc
+AM_CPPFLAGS = -O3 -std=c++11 -Wall -Ideps/libuv/include -Isrc -pipe
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

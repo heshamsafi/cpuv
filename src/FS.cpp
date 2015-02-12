@@ -1,7 +1,6 @@
 #include <iostream>
 #include "FS.hpp"
 #include "DefaultLoop.hpp"
-#include <functional>
 #include <common.hpp>
 #include "Argument.hpp"
 #include <map>
@@ -22,26 +21,41 @@ FS& FS::mode(int mode_){
   this->mode_ = mode_;
   return *this;
 }
-FS& FS::open(uv_fs_cb cb){
+FS& FS::open(cpuv_cb cb){
+  cpuv::Argument* arg = new cpuv::Argument;
+  variantMap* argMap = new variantMap;
+  (*argMap)["cb"] = cb; (*argMap)["arg"] = arg;
+  arg->fs = this;
+  openReq_.data = static_cast<void*>(argMap);
   uv_fs_open(DefaultLoop::getInstance().getDefaultLoop(),
-      &openReq_,fileName().data(),flags(),mode(),cb);
+      &openReq_,fileName().data(),flags(),mode(),[](uv_fs_t* uv_req){
+	static variantMap* argMap =  static_cast<variantMap*>(uv_req->data);
+	static cpuv::Argument* arg = boost::get<cpuv::Argument*>((*argMap)["arg"]);
+	static cpuv_cb cb = static_cast<cpuv_cb>(boost::get<cpuv_cb>((*argMap)["cb"]));
+	CLEAN_ON_FIRST_INVOCATION(argMap);
+	arg->status = (arg->fs->openReq_.result< 0)?Status::ERROR:Status::ALL_GOOD;
+	if(arg->status == Status::ERROR)
+	  arg->errorMsg = uv_strerror(arg->fs->openReq_.result);
+	cb(arg);
+      });
   return *this;
 }
 FS& FS::read(cpuv_cb cb,int64_t offset){
   if(cb) {
     cpuv::Argument* arg = new cpuv::Argument;
     arg->fs = this;
-    typedef std::map<std::string,boost::variant<cpuv::Argument*,cpuv_cb>> variantMap;
     variantMap* argMap = new variantMap;
-    (*argMap)["cb"] = cb;
-    (*argMap)["arg"] = arg;
+    (*argMap)["cb"] = cb; (*argMap)["arg"] = arg;
     readReq_.data = static_cast<void*>(argMap);
     onRead = [](uv_fs_t* uv_req){
       static variantMap* argMap =  static_cast<variantMap*>(uv_req->data);
       static cpuv::Argument* arg = boost::get<cpuv::Argument*>((*argMap)["arg"]);
       static cpuv_cb cb = static_cast<cpuv_cb>(boost::get<cpuv_cb>((*argMap)["cb"]));
-      static bool visited = false;
-      if(!visited){ delete argMap; visited = true; }
+      CLEAN_ON_FIRST_INVOCATION(argMap)
+      arg->status = (arg->fs->readReq_.result< 0)?Status::ERROR:
+                    (arg->fs->readReq_.result==0)?Status::END_OF_FILE:Status::ALL_GOOD;
+      if(arg->status == Status::ERROR)
+	arg->errorMsg = uv_strerror(arg->fs->readReq_.result);
       cb(arg);
     }; 
   }
@@ -60,6 +74,5 @@ FS& FS::close(cpuv::Argument* arg,uv_fs_cb cb) {
   return *this;
 }
 FS::~FS(){
-  uv_fs_req_cleanup(&openReq_);
-  uv_fs_req_cleanup(&readReq_);
+  REF_CLEANUP(openReq_); REF_CLEANUP(readReq_);
 }
