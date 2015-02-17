@@ -1,8 +1,14 @@
-#include "Argument.hpp"
+#include <functional>
 #pragma once
-#define ERR(msg) std::cerr<<msg<<std::endl 
-typedef void (*cpuv_cb)(cpuv::Argument*);
 
+namespace cpuv{
+template <class Caller> class Argument;
+  template <class Caller>
+  using cpuv_cb //= void (*)(Argument<Caller>&);
+                  = std::function<void(Argument<Caller>&)>;
+}
+
+#define ERR(msg) std::cerr<<msg<<std::endl 
 #define CLEAN_ON_FIRST_INVOCATION(ptr) {	\
   static bool visited = false;			\
   if(!visited){ delete ptr; visited = true; }	\

@@ -1,6 +1,7 @@
 #include "uv.h"
 #include <iostream>
 #include "Status.hpp"
+#include "Buffer.hpp"
 #include <map>
 #include <boost/variant.hpp>
 #include "common.hpp"
@@ -8,19 +9,22 @@
 namespace cpuv{
   class FS;
   template <class Caller> class Argument{
-      Caller* caller_;
-      void* capture_;
+      void* capture_{nullptr};
+      Buffer buffer_{nullptr};
+      Caller* this_{nullptr};
     public:
-      Argument(void* capture):capture_(capture),status(Status::ALL_GOOD),errorMsg(nullptr){};
-      Argument<Caller>& setCaller(Caller* caller){ caller_ = caller; return *this; }
-      Caller& getCaller(){ return *caller_;  }
-      Status status;
-      const char* errorMsg;
+      Argument(){};
+      Argument(void* capture):capture_(capture){};
+      Status status{Status::ALL_GOOD};
+      const char* errorMsg{nullptr};
       template<class Capture>
       Capture& getCapture(){ return *static_cast<Capture*>(capture_); }
       template<class Capture>
       Argument& setCapture(Capture* capture){
 	capture_= capture; return *this;
       }
+      Buffer& buffer(){ return buffer_; }
+      Caller& _this(){ return *this_; }
+      Argument& _this(Caller& this_){ this->this_=&this_; return *this; }
   };
 }

@@ -106,11 +106,11 @@ distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = ${SHELL} /usr/local/src/cpuv/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /home/hesham/src/cpuv/missing --run aclocal-1.11
 AMTAR = $${TAR-tar}
-AUTOCONF = ${SHELL} /usr/local/src/cpuv/missing --run autoconf
-AUTOHEADER = ${SHELL} /usr/local/src/cpuv/missing --run autoheader
-AUTOMAKE = ${SHELL} /usr/local/src/cpuv/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/hesham/src/cpuv/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/hesham/src/cpuv/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/hesham/src/cpuv/missing --run automake-1.11
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -135,7 +135,7 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /usr/local/src/cpuv/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/hesham/src/cpuv/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = cpuv
@@ -150,10 +150,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 0.1
-abs_builddir = /usr/local/src/cpuv
-abs_srcdir = /usr/local/src/cpuv
-abs_top_builddir = /usr/local/src/cpuv
-abs_top_srcdir = /usr/local/src/cpuv
+abs_builddir = /home/hesham/src/cpuv
+abs_srcdir = /home/hesham/src/cpuv
+abs_top_builddir = /home/hesham/src/cpuv
+abs_top_srcdir = /home/hesham/src/cpuv
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -173,7 +173,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /usr/local/src/cpuv/install-sh
+install_sh = ${SHELL} /home/hesham/src/cpuv/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -195,7 +195,7 @@ top_builddir = .
 top_srcdir = .
 bin_main_SOURCES = src/main.cpp src/DefaultLoop.cpp src/FS.cpp
 LDADD = deps/libuv/.libs/libuv.so $(INTLLIBS)
-AM_CPPFLAGS = -O3 -std=c++11 -Wall -Ideps/libuv/include -Isrc -pipe
+AM_CPPFLAGS = -g3 -O0 -std=c++11 -Wall -Ideps/libuv/include -Isrc -pipe 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
