@@ -55,7 +55,8 @@ subdir = .
 DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	depcomp install-sh missing
+	ar-lib compile config.guess config.sub depcomp install-sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -72,12 +73,13 @@ am__objects_1 = DefaultLoop.$(OBJEXT) FS.$(OBJEXT)
 am_bin_main_OBJECTS = main.$(OBJEXT) $(am__objects_1)
 bin_main_OBJECTS = $(am_bin_main_OBJECTS)
 bin_main_LDADD = $(LDADD)
-bin_main_DEPENDENCIES = deps/libuv/.libs/libuv.so
+bin_main_DEPENDENCIES = deps/libuv/out/Debug/obj.target/libuv.a
 am__dirstamp = $(am__leading_dot)dirstamp
 am_bin_test_fs_OBJECTS = test-fs.$(OBJEXT) $(am__objects_1)
 bin_test_fs_OBJECTS = $(am_bin_test_fs_OBJECTS)
+am__DEPENDENCIES_1 = deps/libuv/out/Debug/obj.target/libuv.a
 bin_test_fs_DEPENDENCIES = /usr/lib/libboost_unit_test_framework.a \
-	$(LDADD)
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -203,8 +205,8 @@ top_srcdir = @top_srcdir@
 LIBR = src/DefaultLoop.cpp src/FS.cpp
 bin_main_SOURCES = src/main.cpp $(LIBR)
 bin_test_fs_SOURCES = test/test-fs.cpp $(LIBR)
-#LDADD=deps/libuv/.libs/libuv.a -lrt -lpthread -lnsl -ldl
-LDADD = deps/libuv/.libs/libuv.so 
+LDADD = deps/libuv/out/Debug/obj.target/libuv.a -lrt -lpthread -lnsl -ldl
+#LDADD=deps/libuv/.libs/libuv.so 
 bin_test_fs_LDADD = /usr/lib/libboost_unit_test_framework.a $(LDADD)
 AM_CPPFLAGS = -g3 -O0 -std=c++11 -Wall -Ideps/libuv/include -Isrc -pipe
 all: config.h
