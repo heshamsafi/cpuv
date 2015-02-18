@@ -9,7 +9,7 @@
 #include "sstream"
 
 using namespace cpuv;
-std::string fn{"test/test-files/test.txt"};
+std::string fn{"test/test.txt"};
 char* str = 
 "1234567890";
 FS fs; 
