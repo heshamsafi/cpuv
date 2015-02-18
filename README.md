@@ -33,21 +33,13 @@ supported features : (Synchronously and Asynchronously)
 Build Instructions :
 </h5>
 `git clone --recursive git@github.com:heshamsafi/cpuv.git #recursive to clone the submodule(libuv) aswell`
-
 `cd deps/libuv`
-
 `./gyp_uv.py -f make # for some reason can't build libuv with autotools`
-
 `make -C out/`
-
 `cd ../..`
-
 `./configure`
-
 `automake --add-missing`
-
 `make`
-
 `make check # to run unit tests`
 
 this build is done on linux but in theory this project should be portable.
