@@ -11,23 +11,23 @@ so for the mean time use at your own risk.
 supported features : (Synchronously and Asynchronously)
 </h5>
 
-*FS
- *read
- *write
- *unlink
- *~~file watchers~~
- *~~mkdir/rmdir~~
- *~~ls~~
- *~~stat~~
-*~~Networking~~
- *~~TCP~~
- *~~UDP~~
- *~~DNS lookup~~
-*~~Processes~~
- *~~Fork~~
- *~~Signals~~
- *~~IPC~~
- *~~Pipes~~
+* FS
+ * read
+ * write
+ * unlink
+ * ~~file watchers~~
+ * ~~mkdir/rmdir~~
+ * ~~ls~~
+ * ~~stat~~
+* ~~Networking~~
+ * ~~TCP~~
+ * ~~UDP~~
+ * ~~DNS lookup~~
+* ~~Processes~~
+ * ~~Fork~~
+ * ~~Signals~~
+ * ~~IPC~~
+ * ~~Pipes~~
 
 <h5>
 Build Instructions :
