@@ -49,7 +49,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = bin/main$(EXEEXT)
+bin_PROGRAMS = bin/main$(EXEEXT) bin/test-fs$(EXEEXT)
+TESTS = bin/test-fs$(EXEEXT)
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
@@ -67,12 +68,16 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_bin_main_OBJECTS = main.$(OBJEXT) DefaultLoop.$(OBJEXT) \
-	FS.$(OBJEXT)
+am__objects_1 = DefaultLoop.$(OBJEXT) FS.$(OBJEXT)
+am_bin_main_OBJECTS = main.$(OBJEXT) $(am__objects_1)
 bin_main_OBJECTS = $(am_bin_main_OBJECTS)
 bin_main_LDADD = $(LDADD)
 bin_main_DEPENDENCIES = deps/libuv/.libs/libuv.so
 am__dirstamp = $(am__leading_dot)dirstamp
+am_bin_test_fs_OBJECTS = test-fs.$(OBJEXT) $(am__objects_1)
+bin_test_fs_OBJECTS = $(am_bin_test_fs_OBJECTS)
+bin_test_fs_DEPENDENCIES = /usr/lib/libboost_unit_test_framework.a \
+	$(LDADD)
 DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -82,8 +87,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(bin_main_SOURCES)
-DIST_SOURCES = $(bin_main_SOURCES)
+SOURCES = $(bin_main_SOURCES) $(bin_test_fs_SOURCES)
+DIST_SOURCES = $(bin_main_SOURCES) $(bin_test_fs_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -91,6 +96,8 @@ am__can_run_installinfo = \
   esac
 ETAGS = etags
 CTAGS = ctags
+am__tty_colors = \
+red=; grn=; lgn=; blu=; std=
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -116,7 +123,7 @@ CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2
 CPPFLAGS = 
-CXX = g++
+CXX = clang++
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS = -g -O2
 CYGPATH_W = echo
@@ -193,9 +200,13 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
-bin_main_SOURCES = src/main.cpp src/DefaultLoop.cpp src/FS.cpp
-LDADD = deps/libuv/.libs/libuv.so $(INTLLIBS)
-AM_CPPFLAGS = -g3 -O0 -std=c++11 -Wall -Ideps/libuv/include -Isrc -pipe 
+LIBR = src/DefaultLoop.cpp src/FS.cpp
+bin_main_SOURCES = src/main.cpp $(LIBR)
+bin_test_fs_SOURCES = test/test-fs.cpp $(LIBR)
+#LDADD=deps/libuv/.libs/libuv.a -lrt -lpthread -lnsl -ldl
+LDADD = deps/libuv/.libs/libuv.so 
+bin_test_fs_LDADD = /usr/lib/libboost_unit_test_framework.a $(LDADD)
+AM_CPPFLAGS = -g3 -O0 -std=c++11 -Wall -Ideps/libuv/include -Isrc -pipe
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -296,6 +307,9 @@ bin/$(am__dirstamp):
 bin/main$(EXEEXT): $(bin_main_OBJECTS) $(bin_main_DEPENDENCIES) $(EXTRA_bin_main_DEPENDENCIES) bin/$(am__dirstamp)
 	@rm -f bin/main$(EXEEXT)
 	$(CXXLINK) $(bin_main_OBJECTS) $(bin_main_LDADD) $(LIBS)
+bin/test-fs$(EXEEXT): $(bin_test_fs_OBJECTS) $(bin_test_fs_DEPENDENCIES) $(EXTRA_bin_test_fs_DEPENDENCIES) bin/$(am__dirstamp)
+	@rm -f bin/test-fs$(EXEEXT)
+	$(CXXLINK) $(bin_test_fs_OBJECTS) $(bin_test_fs_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -306,6 +320,7 @@ distclean-compile:
 include ./$(DEPDIR)/DefaultLoop.Po
 include ./$(DEPDIR)/FS.Po
 include ./$(DEPDIR)/main.Po
+include ./$(DEPDIR)/test-fs.Po
 
 .cpp.o:
 	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -363,6 +378,20 @@ FS.obj: src/FS.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o FS.obj `if test -f 'src/FS.cpp'; then $(CYGPATH_W) 'src/FS.cpp'; else $(CYGPATH_W) '$(srcdir)/src/FS.cpp'; fi`
 
+test-fs.o: test/test-fs.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test-fs.o -MD -MP -MF $(DEPDIR)/test-fs.Tpo -c -o test-fs.o `test -f 'test/test-fs.cpp' || echo '$(srcdir)/'`test/test-fs.cpp
+	$(am__mv) $(DEPDIR)/test-fs.Tpo $(DEPDIR)/test-fs.Po
+#	source='test/test-fs.cpp' object='test-fs.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test-fs.o `test -f 'test/test-fs.cpp' || echo '$(srcdir)/'`test/test-fs.cpp
+
+test-fs.obj: test/test-fs.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test-fs.obj -MD -MP -MF $(DEPDIR)/test-fs.Tpo -c -o test-fs.obj `if test -f 'test/test-fs.cpp'; then $(CYGPATH_W) 'test/test-fs.cpp'; else $(CYGPATH_W) '$(srcdir)/test/test-fs.cpp'; fi`
+	$(am__mv) $(DEPDIR)/test-fs.Tpo $(DEPDIR)/test-fs.Po
+#	source='test/test-fs.cpp' object='test-fs.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test-fs.obj `if test -f 'test/test-fs.cpp'; then $(CYGPATH_W) 'test/test-fs.cpp'; else $(CYGPATH_W) '$(srcdir)/test/test-fs.cpp'; fi`
+
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
@@ -414,6 +443,99 @@ GTAGS:
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list=' $(TESTS) '; \
+	$(am__tty_colors); \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *[\ \	]$$tst[\ \	]*) \
+		xpass=`expr $$xpass + 1`; \
+		failed=`expr $$failed + 1`; \
+		col=$$red; res=XPASS; \
+	      ;; \
+	      *) \
+		col=$$grn; res=PASS; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *[\ \	]$$tst[\ \	]*) \
+		xfail=`expr $$xfail + 1`; \
+		col=$$lgn; res=XFAIL; \
+	      ;; \
+	      *) \
+		failed=`expr $$failed + 1`; \
+		col=$$red; res=FAIL; \
+	      ;; \
+	      esac; \
+	    else \
+	      skip=`expr $$skip + 1`; \
+	      col=$$blu; res=SKIP; \
+	    fi; \
+	    echo "$${col}$$res$${std}: $$tst"; \
+	  done; \
+	  if test "$$all" -eq 1; then \
+	    tests="test"; \
+	    All=""; \
+	  else \
+	    tests="tests"; \
+	    All="All "; \
+	  fi; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="$$All$$all $$tests passed"; \
+	    else \
+	      if test "$$xfail" -eq 1; then failures=failure; else failures=failures; fi; \
+	      banner="$$All$$all $$tests behaved as expected ($$xfail expected $$failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all $$tests failed"; \
+	    else \
+	      if test "$$xpass" -eq 1; then passes=pass; else passes=passes; fi; \
+	      banner="$$failed of $$all $$tests did not behave as expected ($$xpass unexpected $$passes)"; \
+	    fi; \
+	  fi; \
+	  dashes="$$banner"; \
+	  skipped=""; \
+	  if test "$$skip" -ne 0; then \
+	    if test "$$skip" -eq 1; then \
+	      skipped="($$skip test was not run)"; \
+	    else \
+	      skipped="($$skip tests were not run)"; \
+	    fi; \
+	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$skipped"; \
+	  fi; \
+	  report=""; \
+	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
+	    report="Please report to $(PACKAGE_BUGREPORT)"; \
+	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$report"; \
+	  fi; \
+	  dashes=`echo "$$dashes" | sed s/./=/g`; \
+	  if test "$$failed" -eq 0; then \
+	    col="$$grn"; \
+	  else \
+	    col="$$red"; \
+	  fi; \
+	  echo "$${col}$$dashes$${std}"; \
+	  echo "$${col}$$banner$${std}"; \
+	  test -z "$$skipped" || echo "$${col}$$skipped$${std}"; \
+	  test -z "$$report" || echo "$${col}$$report$${std}"; \
+	  echo "$${col}$$dashes$${std}"; \
+	  test "$$failed" -eq 0; \
+	else :; fi
 
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
@@ -578,6 +700,7 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(PROGRAMS) config.h
 installdirs:
@@ -687,12 +810,12 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: all install-am install-strip
+.MAKE: all check-am install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am am--refresh check check-am clean \
-	clean-binPROGRAMS clean-generic ctags dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-lzma dist-shar dist-tarZ dist-xz \
-	dist-zip distcheck distclean distclean-compile \
+.PHONY: CTAGS GTAGS all all-am am--refresh check check-TESTS check-am \
+	clean clean-binPROGRAMS clean-generic ctags dist dist-all \
+	dist-bzip2 dist-gzip dist-lzip dist-lzma dist-shar dist-tarZ \
+	dist-xz dist-zip distcheck distclean distclean-compile \
 	distclean-generic distclean-hdr distclean-tags distcleancheck \
 	distdir distuninstallcheck dvi dvi-am html html-am info \
 	info-am install install-am install-binPROGRAMS install-data \

@@ -27,7 +27,7 @@ namespace cpuv{
       Argument<FS>* arg=new Argument<FS>(capture);
       openReq_->data = packArgMap(cb,arg);
       uv_cb = 
-	CPUV_CB( 
+	LIBUV_CB( 
 	  uv_fs_t& openReq_ = *arg->_this().openReq_;
 	  arg->status = (openReq_.result< 0)?Status::ERROR:Status::ALL_GOOD;
 	  if(arg->status == Status::ERROR)
@@ -63,7 +63,7 @@ namespace cpuv{
       arg->buffer().resize(5);
       readReq_->data = packArgMap(cb,arg);
       uv_buff = uv_buf_init(arg->buffer().get<char*>(),arg->buffer().capacity);
-      onRead = CPUV_CB(
+      onRead = LIBUV_CB(
       auto& caller = arg->_this();
        	uv_fs_t& readReq_ = *caller.readReq_;
 	arg->status = (readReq_.result< 0)?Status::ERROR:
@@ -94,31 +94,21 @@ namespace cpuv{
   int FS::write(char* str,size_t size,cpuv_cb<FS> cb,void* capture,int fd,int64_t offset){
     uv_fs_cb uv_cb = nullptr;
     writeReq_ = new uv_fs_t;
-    if(cb){
-      Argument<FS>* arg=new Argument<FS>(capture);
-      writeReq_->data = packArgMap(cb,arg);
-      uv_cb = [](uv_fs_t* uv_req){
-	variantMap* argMap 
-	  = static_cast<variantMap*>(uv_req->data), argMapAlias = *argMap;
-	Argument<FS>* arg = boost::get<Argument<FS>*>(argMapAlias["arg"]);
-	cpuv_cb<FS> cb = boost::get<cpuv_cb<FS> >(argMapAlias["cb"]);
-	uv_fs_t& openReq_ = *arg->_this().openReq_;
-	arg->status = (openReq_.result< 0)?Status::ERROR:Status::ALL_GOOD;
-	if(arg->status == Status::ERROR)
-	  arg->errorMsg = uv_strerror(openReq_.result);
-	cb(*arg);
-	uv_fs_req_cleanup(arg->_this().writeReq_);
-	delete arg->_this().writeReq_;
-	delete argMap; delete arg;
-      };
-    }
+    Argument<FS>* arg=new Argument<FS>(capture);
+    writeReq_->data = packArgMap(cb,arg);
+    uv_cb = LIBUV_CB(
+      uv_fs_t& writeReq_ = *arg->_this().writeReq_;
+      arg->status = (writeReq_.result< 0)?Status::ERROR:Status::ALL_GOOD;
+      if(arg->status == Status::ERROR)
+	arg->errorMsg = uv_strerror(writeReq_.result);
+      cb(*arg);
+      uv_fs_req_cleanup(arg->_this().writeReq_);
+      delete arg->_this().writeReq_;
+      delete argMap; delete arg;
+    )
     const uv_buf_t uv_buff = uv_buf_init(str,size); 
     int ret = uv_fs_write(DefaultLoop::getInstance().getDefaultLoop(), writeReq_,fd>-1?fd:openReq_->result,
 	&uv_buff, 1, offset, uv_cb);
-    if(!cb){
-      uv_fs_req_cleanup(writeReq_);
-      delete writeReq_;
-    }
     return ret;
   }
   int FS::writeSync(int fd,char* str,size_t size,int64_t offset){
@@ -137,16 +127,13 @@ namespace cpuv{
     if(cb) {
       Argument<FS>* arg=new Argument<FS>(capture);
       closeReq_->data = packArgMap(cb,arg);
-      uv_cb = [](uv_fs_t* uv_req){
-	variantMap* argMap = static_cast<variantMap*>(uv_req->data), argMapAlias = *argMap;
-	Argument<FS>* arg = boost::get<Argument<FS>*>(argMapAlias["arg"]);
-	cpuv_cb<FS> cb = boost::get<cpuv_cb<FS> >(argMapAlias["cb"]);
+      uv_cb = LIBUV_CB(
 	cb(*arg);
 	uv_fs_req_cleanup(arg->_this().openReq_);
 	uv_fs_req_cleanup(arg->_this().closeReq_);
 	delete arg->_this().closeReq_;
 	delete arg->_this().openReq_; delete argMap; delete arg; 
-      };
+      )
     }
     int ret = uv_fs_close(DefaultLoop::getInstance().getDefaultLoop(),
 	closeReq_,openReq_->result,uv_cb);
@@ -155,6 +142,28 @@ namespace cpuv{
       uv_fs_req_cleanup(closeReq_);
       delete closeReq_;
       delete openReq_;
+    } 
+    return ret;
+  }
+  int FS::unlink(std::string& fileName,cpuv_cb<FS> cb,void* capture){
+    unlinkReq_ = new uv_fs_t;
+    uv_fs_cb uv_cb = nullptr;
+    if(cb) {
+      Argument<FS>* arg=new Argument<FS>(capture);
+      unlinkReq_->data = packArgMap(cb,arg);
+      uv_cb = LIBUV_CB(
+	arg->status = (arg->_this().unlinkReq_>0)?Status::ALL_GOOD:Status::ERROR;
+	cb(*arg);
+	uv_fs_req_cleanup(arg->_this().unlinkReq_);
+	delete arg->_this().unlinkReq_;
+	delete argMap; delete arg; 
+	)
+    }
+    int ret = uv_fs_unlink(DefaultLoop::getInstance().getDefaultLoop(),
+	unlinkReq_,fileName.data(),uv_cb);
+    if(!cb){
+      uv_fs_req_cleanup(unlinkReq_);
+      delete unlinkReq_;
     } 
     return ret;
   }

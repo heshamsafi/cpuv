@@ -1,6 +1,5 @@
 #include <iostream>
 #include <common.hpp>
-#include "cstring"
 
 #pragma once
 namespace cpuv{

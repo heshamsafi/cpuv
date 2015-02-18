@@ -1,13 +1,12 @@
-#include "uv.h"
 #include <iostream>
-#include "Status.hpp"
-#include "Buffer.hpp"
 #include <map>
 #include <boost/variant.hpp>
 #include "common.hpp"
+#include "Buffer.hpp"
+#include "Status.hpp"
+
 #pragma once
 namespace cpuv{
-  class FS;
   template <class Caller> class Argument{
       void* capture_{nullptr};
       Buffer buffer_{nullptr};

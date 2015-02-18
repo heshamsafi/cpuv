@@ -3,8 +3,6 @@
 #include "DefaultLoop.hpp"
 #include "common.hpp"
 #include "Argument.hpp"
-#include "cstring"
-#include "cstdlib"
 
 using namespace cpuv;
 int main(int /*argc*/,char** argv){
@@ -20,12 +18,12 @@ int main(int /*argc*/,char** argv){
 	  arg._this().close();
 	break;
 	default:
-	  arg._this().writeSync(STDOUT_FILENO, arg.buffer().get<char*>(), arg.buffer().size);
-	  arg._this().read();
-	  //arg._this().write(arg.buffer().get<char*>()
-	      //,arg.buffer().size, [](Argument<FS>& arg){
-	    //arg._this().read();
-	  //},nullptr,STDOUT_FILENO);
+	  //arg._this().writeSync(STDOUT_FILENO, arg.buffer().get<char*>(), arg.buffer().size);
+	  arg._this().write(arg.buffer().get<char*>()
+	      ,arg.buffer().size, [](Argument<FS>& arg){
+	    arg._this().read();
+	  },nullptr,STDOUT_FILENO);
+	  //arg._this().read();
 	}
     }); 
   });

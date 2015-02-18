@@ -5,7 +5,7 @@
 #include <Buffer.hpp>
 #pragma once
 
-#define CPUV_CB(code)                                                                      \
+#define LIBUV_CB(code)                                                                      \
   [](uv_fs_t* uv_req){                                                                     \
     variantMap* argMap = static_cast<variantMap*>(uv_req->data), argMapAlias = *argMap;    \
     Argument<FS>* arg = boost::get<Argument<FS>*>(argMapAlias["arg"]);                     \
@@ -20,6 +20,7 @@ namespace cpuv{
     uv_fs_t* readReq_;
     uv_fs_t* writeReq_;
     uv_fs_t* closeReq_;
+    uv_fs_t* unlinkReq_;
     std::string fileName_;
     int flags_;
     int mode_;
@@ -34,12 +35,13 @@ namespace cpuv{
     FS& flags(int);
     int mode() const;
     FS& mode(int);
-    int open(cpuv_cb<FS> =nullptr,void* =nullptr);
-    int read(cpuv_cb<FS> =nullptr,void* =nullptr,int64_t=-1);
-    int write(char*,size_t,cpuv_cb<FS>,void* =nullptr,int=-1,int64_t=-1);
-    int readSync(int,Argument<FS>&,int64_t =-1);
-    int writeSync(int,char*,size_t,int64_t =-1);
-    int close(cpuv_cb<FS> =nullptr,void* =nullptr);
+    int open(cpuv_cb<FS> cb=nullptr,void* capture=nullptr);
+    int read(cpuv_cb<FS> cb=nullptr,void* capture=nullptr,int64_t offset=-1);
+    int write(char* str,size_t size,cpuv_cb<FS> cb,void* capture=nullptr,int fd=-1,int64_t offset=-1);
+    int readSync(int fd,Argument<FS>&,int64_t offset=-1);
+    int writeSync(int fd,char* str,size_t size,int64_t offset=-1);
+    int close(cpuv_cb<FS> =nullptr,void* capture=nullptr);
+    int unlink(std::string& str,cpuv_cb<FS> cb=nullptr,void* capture=nullptr);
   };
   using variantMap = std::map<std::string,boost::variant<Argument<FS>*,cpuv_cb<FS>>>;
 };
