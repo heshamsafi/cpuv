@@ -10,8 +10,7 @@
 
 using namespace cpuv;
 std::string fn{"test/test.txt"};
-char* str = 
-"1234567890";
+char* str = "1234567890";
 FS fs; 
 
 BOOST_AUTO_TEST_CASE(WRITE_SYNC){ 
@@ -67,9 +66,31 @@ BOOST_AUTO_TEST_CASE(READ_ASYNC){
   DefaultLoop::getInstance().run();
 }
 
+BOOST_AUTO_TEST_CASE(FILE_WATCH){
+  std::vector<std::string> files{fn};
+  int count = 1;
+  fs.watch(files,[](Argument<FS>& arg){
+      static int count = arg.getCapture<int>();
+      if(--count < 0) arg._this().unwatch(arg.fileName.first);
+  },&count);
+  fs.flags(O_WRONLY).mode(0644).fileName(fn).open([](Argument<FS>& arg){
+    if(Status::ERROR==arg.status) throw "ASYNC FILE OPEN FAILED";
+    arg._this().write(str, strlen(str), [](Argument<FS>& arg){
+      if(Status::ERROR==arg.status) throw "ASYNC FILE WRITE FAILED";
+      fs.close();
+    });
+  }); 
+  FS fs2;
+  int fd = fs2.flags(O_WRONLY).mode(0644).fileName(fn).open(); 
+  fs2.writeSync(fd, str, strlen(str));
+  fs2.close();
+  DefaultLoop::getInstance().run();
+}
+
 BOOST_AUTO_TEST_CASE(UNLINK_ASYNC){
  fs.unlink(fn,[](Argument<FS>& arg){
-  if(Status::ERROR==arg.status) throw "ASYNC UNLINK READ FAILED";
+  if(Status::ERROR==arg.status) throw "ASYNC UNLINK FAILED";
  });
  DefaultLoop::getInstance().run();
 }
+

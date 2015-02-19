@@ -15,7 +15,7 @@ supported features : (Synchronously and Asynchronously)
  * read
  * write
  * unlink
- * ~~file watchers~~
+ * file watchers
  * ~~mkdir/rmdir~~
  * ~~ls~~
  * ~~stat~~

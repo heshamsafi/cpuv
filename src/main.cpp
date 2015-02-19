@@ -5,27 +5,16 @@
 #include "Argument.hpp"
 
 using namespace cpuv;
-int main(int /*argc*/,char** argv){
+int main(int /*argc*/,char**){
   FS fs;
-  fs.fileName(argv[1]).open([](Argument<FS>& arg){
-    if(arg.status == Status::ERROR) ERR(arg.errorMsg);
-    else
-    arg._this().read([](Argument<FS>& arg){
-	switch(arg.status){
-	case Status::ERROR:
-	  ERR(arg.errorMsg);
-	case Status::END_OF_FILE:
-	  arg._this().close();
-	break;
-	default:
-	  //arg._this().writeSync(STDOUT_FILENO, arg.buffer().get<char*>(), arg.buffer().size);
-	  arg._this().write(arg.buffer().get<char*>()
-	      ,arg.buffer().size, [](Argument<FS>& arg){
-	    arg._this().read();
-	  },nullptr,STDOUT_FILENO);
-	  //arg._this().read();
-	}
-    }); 
+  std::vector<std::string> files {"/home/hesham/cpplay/test"};
+  fs.watch(files,[](Argument<FS>& arg){
+      static int i = 5;
+      if(i-- > 0) {
+      std::cout<<arg.fileName.first<<std::endl;
+      std::cout<<arg.fileName.second<<std::endl;
+      }else
+      arg._this().unwatch(arg.fileName.first);
   });
   DefaultLoop::getInstance().run();
 }

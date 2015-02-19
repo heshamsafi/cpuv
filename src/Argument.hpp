@@ -12,8 +12,9 @@ namespace cpuv{
       Buffer buffer_{nullptr};
       Caller* this_{nullptr};
     public:
+      std::pair<std::string, std::string> fileName;
       Argument(){};
-      Argument(void* capture):capture_(capture){};
+      Argument(void* capture,Caller* caller):capture_(capture),this_(caller){};
       Status status{Status::ALL_GOOD};
       const char* errorMsg{nullptr};
       template<class Capture>
